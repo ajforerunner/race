@@ -308,7 +308,6 @@ Set(varHSReps, Blank());
 Set(varAppLoaded, true);
 
 
-
 StartScreen:
 If(
     !IsBlank(Param("EvalItemID")),
@@ -1100,7 +1099,36 @@ Screens:
                               NumberOfColumns: =2
                               OnFailure: |-
                                 =Set(varErrorMessage, "Error creating planner: " & Self.Error)
-                              OnSuccess: "=With(\n    { lastRec: Self.LastSubmit },\n\n    Set(varNewPlannerID, lastRec.PlannerID);\n    Set(varSelectedPlannerID, lastRec.PlannerID);\n    Set(varPlannerMode, \"New\");\n\n    Set(varProjectName, lastRec.'Project Name'.Value);\n    Set(varRAMSTitle, lastRec.Title);\n    Set(varTrade, lastRec.'Trade - Package'.Value);\n    Set(varCreatedBy, lastRec.'Prepared By');\n    Set(varHSReps, Concat(lastRec.HSValidators, DisplayName, \", \"));\n    Set(varPManagers, Concat(lastRec.ProjectManagers, DisplayName, \", \"));\n\n// Replace your current Navigate function within the With() block to this:\n    UpdateContext({ showDrawer: false });\n    \n    Navigate(\n        'RAMS Planner',\n        ScreenTransition.Fade,\n        {\n            paramPlannerID: lastRec.PlannerID,\n            paramHeaderRecord: Blank(), // Forcing a fresh data lookup to prevent blank fields\n            paramReturnPlannerRowID: Blank()\n        }\n    ))"
+                              OnSuccess: "=With(
+    { lastRec: Self.LastSubmit },
+
+    Set(varNewPlannerID, lastRec.PlannerID);
+    Set(varSelectedPlannerID, lastRec.PlannerID);
+    Set(varPlannerMode, "New");
+
+    Set(varProjectName, lastRec.'Project Name'.Value);
+    Set(varRAMSTitle, lastRec.Title);
+    Set(varTrade, lastRec.'Trade - Package'.Value);
+    Set(varCreatedBy, lastRec.'Prepared By');
+    Set(varHSReps, Concat(lastRec.HSValidators, DisplayName, ", "));
+    Set(varPManagers, Concat(lastRec.ProjectManagers, DisplayName, ", "));
+
+    // ADDED: Instantly pushes the new record into your gallery's collection
+    Collect(colAccessiblePlannerHeaders, lastRec);
+
+    UpdateContext({ showDrawer: false });
+    
+    Navigate(
+        'RAMS Planner',
+        ScreenTransition.Fade,
+        {
+            paramPlannerID: lastRec.PlannerID,
+            // UPDATED: Passes the actual record to the next screen instead of Blank()
+            paramHeaderRecord: lastRec, 
+            paramReturnPlannerRowID: Blank()
+        }
+    )
+)"
                               Width: =Parent.Width- 40
                               X: =20
                               Y: =105
